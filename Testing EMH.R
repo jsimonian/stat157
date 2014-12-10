@@ -57,16 +57,52 @@ ManMom <- function(x) {
   cash <- 10000
   stock <- 0
   for(i in 1:(length(x[,1]))) {
-    if((x[i,]$Open > x[i,]$Close) && stock > cash) {
+    if(((x[i,]$Open*(x[i,]$Adj.Close/x[i,]$Close)) > 
+          x[i,]$Adj.Close) && stock > cash) {
       cash <- stock*x[i,]$Close
       stock <- 0
     }
-    if((x[i,]$Open < x[i,]$Close) && cash > stock) {
+    if(((x[i,]$Open*(x[i,]$Adj.Close/x[i,]$Close)) < 
+          x[i,]$Adj.Close) && cash > stock) {
       stock <- cash/x[i,]$Close
       cash <- 0
     }
-    print(c(cash, stock, x[i,]$Open, x[i,]$Close))
+    print(c(cash, stock, x[i,]$Adj.Close))
   }
-  return(c(cash, stock, x[i,]$Open, x[i,]$Close))
+  return(max(cash, stock*(x[5021,]$Adj.Close)))
 }
+
+# Returns value of assets over time for a player of the "Manic Momentum" game.
+
+Predic <- function(x) {
+  same <- 0
+  diff <- 0
+  for(i in 2:(length(x[,1]))) {
+    if((x[i,]$Open > x[i,]$Close) && (x[i-1,]$Open > x[i-1,]$Close)) {
+      same <- same + 1
+    }
+    if((x[i,]$Open < x[i,]$Close) && (x[i-1,]$Open < x[i-1,]$Close)) {
+      same <- same + 1
+    }
+    if((x[i,]$Open > x[i,]$Close) && (x[i-1,]$Open < x[i-1,]$Close)) {
+      diff <- diff + 1
+    }
+    if((x[i,]$Open < x[i,]$Close) && (x[i-1,]$Open > x[i-1,]$Close)) {
+      diff <- diff + 1
+    }
+  }
+  return(c(same, diff))
+}
+
+# checks to see if stocks are predictible in their movements.
+
+x <- list(0)
+for(i in 1:4) {x[[i]] <- 2*(floor(runif(5021, 0, 2)))-1}
+y <- list(0, 0, 0, 0, 0)
+for(j in 1:4){
+  for(i in 2:5022) {y[[j]][i] <- y[[j]][i-1] + x[[j]][i-1]}}
+for(i in 1:4) {plot(1:5022, y[[i]]+100, type = 'l')}
+
+# generates charts that look like stocks, but aren't.
+
 
